@@ -1,0 +1,36 @@
+# EcoMarket CODEOWNERS
+# This file defines who owns different parts of the codebase
+# and who should review changes to those areas.
+#
+# Order is important; the last matching pattern takes precedence.
+# For more information: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - should review all changes by default
+* @EcoMarket/core-team
+
+# Services ownership
+/services/ @EcoMarket/backend-team
+/services/user-service/ @EcoMarket/user-team
+/services/product-catalog-service/ @EcoMarket/catalog-team
+/services/order-service/ @EcoMarket/order-team
+
+# Frontend ownership
+/frontend/ @EcoMarket/frontend-team
+/frontend/customer-web/ @EcoMarket/frontend-team @EcoMarket/ux-team
+
+# Infrastructure ownership
+/infrastructure/ @EcoMarket/devops-team
+/infrastructure/docker/ @EcoMarket/devops-team
+/infrastructure/k8s/ @EcoMarket/devops-team
+/infrastructure/gateway/ @EcoMarket/devops-team @EcoMarket/backend-team
+
+# Documentation
+/docs/ @EcoMarket/core-team @EcoMarket/tech-writers
+README.md @EcoMarket/core-team
+CONTRIBUTING.md @EcoMarket/core-team
+
+# Configuration files
+package.json @EcoMarket/core-team
+nx.json @EcoMarket/core-team
+turbo.json @EcoMarket/core-team
+.github/ @EcoMarket/core-team
