@@ -6,7 +6,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"net/http"
 	"github.com/gorilla/mux"
-	"io/ioutil"
 	"database/sql"
 	"github.com/google/uuid"
 )
@@ -91,7 +90,8 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Simplified; implement actual update logic
+	// Simplified; implement actual update logic using orderID
+	_ = orderID // TODO: Use orderID in actual implementation
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -110,6 +110,8 @@ func (h *OrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Simplified; replace with logic to update order status
+	// Simplified; replace with logic to update order status using orderID and req
+	_ = orderID // TODO: Use orderID in actual implementation
+	_ = req // TODO: Use req in actual implementation
 	w.WriteHeader(http.StatusNoContent)
 }
