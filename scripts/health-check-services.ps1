@@ -1,7 +1,15 @@
 # Health Check Script for Backend Services
 # This script checks the health of all running Docker Compose services
 
+# Import service endpoints configuration
+. "$PSScriptRoot/service-endpoints.ps1"
+
 Write-Host "=== Backend Services Health Check ===" -ForegroundColor Green
+
+# Load environment variables
+$envVars = Get-EnvVariables
+# Get service endpoints
+$serviceEndpoints = Get-ServiceEndpoints -EnvVars $envVars
 
 # Find all docker-compose.yml files in services directory
 $dockerComposeFiles = Get-ChildItem -Path "services" -Recurse -Name "docker-compose.*" | Where-Object { $_ -match "docker-compose\.(yml|yaml)$" }
@@ -27,59 +35,12 @@ foreach ($composeFile in $dockerComposeFiles) {
             Write-Host "  $status $($service.Service): $($service.State)" -ForegroundColor $(if ($service.State -eq "running") { "Green" } else { "Red" })
         }
         
-        # Perform health checks based on service type
-        switch ($serviceName) {
-            "order-service" {
-                Write-Host "  Testing health endpoint..." -ForegroundColor Yellow
-                try {
-                    $response = Invoke-RestMethod -Uri "http://localhost:8003/api/v1/health" -Method Get -TimeoutSec 5
-                    if ($response.status -eq "healthy") {
-                        Write-Host "  Health check passed: $($response.status)" -ForegroundColor Green
-                    } else {
-                        Write-Host "  Health check failed: $($response.status)" -ForegroundColor Red
-                    }
-                } catch {
-                    Write-Host "  Health check failed: $($_.Exception.Message)" -ForegroundColor Red
-                }
-            }
-            "user-service" {
-                Write-Host "  Testing health endpoint..." -ForegroundColor Yellow
-                try {
-                    $response = Invoke-RestMethod -Uri "http://localhost:8001/api/v1/health" -Method Get -TimeoutSec 5
-                    Write-Host "  Health check passed" -ForegroundColor Green
-                } catch {
-                    Write-Host "  Health check failed: $($_.Exception.Message)" -ForegroundColor Red
-                }
-            }
-            "payment-service" {
-                Write-Host "  Testing health endpoint..." -ForegroundColor Yellow
-                try {
-                    $response = Invoke-RestMethod -Uri "http://localhost:8002/api/v1/health" -Method Get -TimeoutSec 5
-                    Write-Host "  Health check passed" -ForegroundColor Green
-                } catch {
-                    Write-Host "  Health check failed: $($_.Exception.Message)" -ForegroundColor Red
-                }
-            }
-            "analytics-service" {
-                Write-Host "  Testing health endpoint..." -ForegroundColor Yellow
-                try {
-                    $response = Invoke-RestMethod -Uri "http://localhost:8004/health/" -Method Get -TimeoutSec 5
-                    Write-Host "  Health check passed" -ForegroundColor Green
-                } catch {
-                    Write-Host "  Health check failed: $($_.Exception.Message)" -ForegroundColor Red
-                }
-            }
-            "notification-service" {
-                Write-Host "  Testing health endpoint..." -ForegroundColor Yellow
-                try {
-                    $response = Invoke-RestMethod -Uri "http://localhost:8005/api/v1/health" -Method Get -TimeoutSec 5
-                    Write-Host "  Health check passed" -ForegroundColor Green
-                } catch {
-                    Write-Host "  Health check failed: $($_.Exception.Message)" -ForegroundColor Red
-                }
-            }
-            default {
-                Write-Host "  No specific health check configured for $serviceName" -ForegroundColor Gray
+        # Perform health checks using GetEnumerator()
+        foreach ($check in $serviceEndpoints.GetEnumerator()) {
+            if ($serviceName -eq $check.Key) {
+                Write-Host "  Testing health endpoint for $($check.Key)..." -ForegroundColor Yellow
+                $result = Test-ServiceHealth -ServiceName $check.Key -Url $check.Value
+                Write-Host "  $($result.Message)" -ForegroundColor $(if ($result.Success) { "Green" } else { "Red" })
             }
         }
     } else {

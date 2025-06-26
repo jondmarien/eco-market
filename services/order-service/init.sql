@@ -60,6 +60,19 @@ INSERT INTO orders (id, user_id, status, total_amount, currency, shipping_street
     (uuid_generate_v4(), uuid_generate_v4(), 'pending', 99.99, 'USD', '123 Main St', 'Seattle', 'WA', '98101', 'USA', '123 Main St', 'Seattle', 'WA', '98101', 'USA'),
     (uuid_generate_v4(), uuid_generate_v4(), 'confirmed', 149.99, 'USD', '456 Oak Ave', 'Portland', 'OR', '97201', 'USA', '456 Oak Ave', 'Portland', 'OR', '97201', 'USA');
 
+-- Create user if it doesn't exist
+DO
+$do$
+BEGIN
+   IF NOT EXISTS (
+      SELECT FROM pg_catalog.pg_roles
+      WHERE rolname = 'orders_user') THEN
+      CREATE ROLE orders_user LOGIN PASSWORD 'orders_password';
+   END IF;
+END
+$do$;
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO orders_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO orders_user;
+GRANT ALL PRIVILEGES ON DATABASE orders_db TO orders_user;

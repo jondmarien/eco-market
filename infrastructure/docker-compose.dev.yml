@@ -105,16 +105,21 @@ services:
       dockerfile: Dockerfile
     container_name: ecomarket-user-service
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV}
       - PORT=${USER_SERVICE_PORT}
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - MONGODB_URI=${USER_SERVICE_MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=${JWT_EXPIRE}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_REFRESH_EXPIRE=${JWT_REFRESH_EXPIRE}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - REDIS_URL=${REDIS_URL}
     ports:
       - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
     networks:
       - ecomarket-network
     depends_on:
-      postgres:
+      mongodb:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -129,13 +134,20 @@ services:
       dockerfile: Dockerfile
     container_name: product-catalog-service
     environment:
-      POSTGRES_SERVER: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: product_catalog
-      POSTGRES_USER: ecomarket
-      POSTGRES_PASSWORD: password
+      POSTGRES_SERVER: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_URL: ${PRODUCT_CATALOG_DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      DEBUG: ${DEBUG}
+      ENVIRONMENT: ${ENVIRONMENT}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
     ports:
-      - "8000:8000"
+      - "${PRODUCT_SERVICE_PORT}:8000"
     networks:
       - ecomarket-network
     depends_on:
@@ -276,8 +288,11 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@ecomarket.dev
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_LISTEN_PORT: 80
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
     ports:
       - "8080:80"
+    volumes:
+      - ./pgadmin-servers.json:/pgadmin4/servers.json
     networks:
       - ecomarket-network
     depends_on:
@@ -296,8 +311,8 @@ services:
       KONG_PROXY_LISTEN: ${KONG_PROXY_LISTEN}
       KONG_LOG_LEVEL: info
     ports:
-      - "8090:8000"  # Proxy (changed to avoid conflict with pgAdmin)
-      - "8001:8001"  # Admin API
+      - "${KONG_PROXY_PORT}:8090"  # Proxy
+      - "${KONG_ADMIN_PORT}:8002"  # Admin API
     volumes:
       - ./api-gateway:/kong/declarative
     networks:

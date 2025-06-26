@@ -111,5 +111,29 @@ SELECT
 FROM categories c WHERE c.slug = 'clothing'
 ON CONFLICT (sku) DO NOTHING;
 
+-- Create users if they don't exist
+DO
+$do$
+BEGIN
+   IF NOT EXISTS (
+      SELECT FROM pg_catalog.pg_roles
+      WHERE rolname = 'eco') THEN
+      CREATE ROLE eco LOGIN PASSWORD 'eco_pass';
+   END IF;
+   
+   IF NOT EXISTS (
+      SELECT FROM pg_catalog.pg_roles
+      WHERE rolname = 'ecomarket') THEN
+      CREATE ROLE ecomarket LOGIN PASSWORD 'ecomarket_secure_password_2024';
+   END IF;
+END
+$do$;
+
+-- Grant privileges to both users
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO eco;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO eco;
+GRANT ALL PRIVILEGES ON DATABASE ecomarket_dev TO eco;
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ecomarket;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ecomarket;
+GRANT ALL PRIVILEGES ON DATABASE ecomarket_dev TO ecomarket;

@@ -1,4 +1,69 @@
 #!/usr/bin/env pwsh
+# Set-StrictMode -Version Latest  # Commented out to avoid parameter initialization issues
+
+param (
+    [Parameter(HelpMessage="Start only backend services (Docker Compose infrastructure)")]
+    [switch] $Backend,
+
+    [Parameter(HelpMessage="Start all frontend applications")]
+    [switch] $Frontend,
+
+    [Parameter(HelpMessage="Start complete development environment (backend + frontend)")]
+    [switch] $FullStack,
+
+    [Parameter(HelpMessage="Start only customer-web frontend")]
+    [switch] $CustomerWeb,
+
+    [Parameter(HelpMessage="Start only admin-dashboard frontend")]
+    [switch] $AdminDashboard,
+
+    [Parameter(HelpMessage="Start only vendor-portal frontend")]
+    [switch] $VendorPortal,
+
+    [Parameter(HelpMessage="Start only mobile app (Expo)")]
+    [switch] $MobileApp,
+
+    [Parameter(HelpMessage="Include monitoring stack (Prometheus, Grafana)")]
+    [switch] $Monitoring,
+
+    [Parameter(HelpMessage="Run health checks on all services")]
+    [switch] $HealthCheck,
+
+    [Parameter(HelpMessage="Stop all development services")]
+    [switch] $Stop,
+
+    [Parameter(HelpMessage="Show status of all services")]
+    [switch] $Status,
+
+    [Parameter(HelpMessage="Show detailed help information")]
+    [switch] $Help
+)
+
+# Initialize switch parameters to false if not set
+if (-not $PSBoundParameters.ContainsKey('Backend')) { $Backend = $false }
+if (-not $PSBoundParameters.ContainsKey('Frontend')) { $Frontend = $false }
+if (-not $PSBoundParameters.ContainsKey('FullStack')) { $FullStack = $false }
+if (-not $PSBoundParameters.ContainsKey('CustomerWeb')) { $CustomerWeb = $false }
+if (-not $PSBoundParameters.ContainsKey('AdminDashboard')) { $AdminDashboard = $false }
+if (-not $PSBoundParameters.ContainsKey('VendorPortal')) { $VendorPortal = $false }
+if (-not $PSBoundParameters.ContainsKey('MobileApp')) { $MobileApp = $false }
+if (-not $PSBoundParameters.ContainsKey('Monitoring')) { $Monitoring = $false }
+if (-not $PSBoundParameters.ContainsKey('HealthCheck')) { $HealthCheck = $false }
+if (-not $PSBoundParameters.ContainsKey('Stop')) { $Stop = $false }
+if (-not $PSBoundParameters.ContainsKey('Status')) { $Status = $false }
+if (-not $PSBoundParameters.ContainsKey('Help')) { $Help = $false }
+
+function Enable-UnicodeOutput {
+    try {
+        $PSStyle.OutputRendering = 'Ansi'
+    } catch {}
+    if ($IsWindows) {
+        chcp 65001 | Out-Null
+        $OutputEncoding = [Text.UTF8Encoding]::new($false)
+        [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+    }
+}
+
 <#
 .SYNOPSIS
     Comprehensive EcoMarket Development Environment Orchestrator
@@ -14,7 +79,7 @@
     Start only backend services (Docker Compose infrastructure)
 
 .PARAMETER Frontend
-    Start only frontend applications
+    Start all frontend applications
 
 .PARAMETER FullStack
     Start complete development environment (backend + frontend)
@@ -47,40 +112,86 @@
     Show detailed help information
 
 .EXAMPLE
-    .\dev.ps1 -FullStack
-    Start the complete development environment
+    ./dev.ps1 -FullStack
+    Start the complete development environment with both backend services and all frontend applications
 
 .EXAMPLE
-    .\dev.ps1 -Backend -Monitoring
-    Start only backend services with monitoring
+    ./dev.ps1 -Monitoring -Status
+    Include monitoring stack and show status of all services
 
 .EXAMPLE
-    .\dev.ps1 -CustomerWeb
-    Start only the customer web frontend
+    ./dev.ps1 -Backend -Monitoring
+    Start only backend services with monitoring stack (Prometheus, Grafana)
 
 .EXAMPLE
-    .\dev.ps1 -HealthCheck
-    Check health of all running services
+    ./dev.ps1 -Frontend
+    Start all frontend applications (customer-web, admin-dashboard, vendor-portal, mobile-app)
 
 .EXAMPLE
-    .\dev.ps1 -Stop
-    Stop all development services
+    ./dev.ps1 -CustomerWeb
+    Start only the customer web frontend application
+
+.EXAMPLE
+    ./dev.ps1 -AdminDashboard -VendorPortal
+    Start only the admin dashboard and vendor portal frontend applications
+
+.EXAMPLE
+    ./dev.ps1 -MobileApp
+    Start only the mobile app (Expo) frontend
+
+.EXAMPLE
+    ./dev.ps1 -HealthCheck
+    Run health checks on all running services
+
+.EXAMPLE
+    ./dev.ps1 -Status
+    Show status of all backend and frontend services
+
+.EXAMPLE
+    ./dev.ps1 -Stop
+    Stop all development services (backend and frontend)
+
+.EXAMPLE
+    ./dev.ps1 -Help
+    Show detailed help information with usage examples
 #>
 
-Param(
-    [switch]$Backend,
-    [switch]$Frontend,
-    [switch]$FullStack,
-    [switch]$CustomerWeb,
-    [switch]$AdminDashboard,
-    [switch]$VendorPortal,
-    [switch]$MobileApp,
-    [switch]$Monitoring,
-    [switch]$HealthCheck,
-    [switch]$Stop,
-    [switch]$Status,
-    [switch]$Help
-)
+# Initialize Unicode output
+Enable-UnicodeOutput
+
+# Check if Unicode output is working
+$UseUnicode = $true
+try {
+    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+    $testOutput = "🚀"
+    # If we can't properly encode/decode unicode, fall back to ASCII
+    if ([System.Text.Encoding]::UTF8.GetBytes($testOutput).Length -le 1) {
+        $UseUnicode = $false
+    }
+} catch {
+    $UseUnicode = $false
+}
+
+# Emoji variables with Unicode/ASCII fallback
+$EmojiHourglass = if ($UseUnicode) { "⏳" } else { "[WAIT]" }
+$EmojiCheckMark = if ($UseUnicode) { "✅" } else { "[OK]" }
+$EmojiWarning = if ($UseUnicode) { "⚠️" } else { "[WARN]" }
+$EmojiCrossMark = if ($UseUnicode) { "❌" } else { "[FAIL]" }
+$EmojiCustomerWeb = if ($UseUnicode) { "🌐" } else { "[WEB]" }
+$EmojiAdminDashboard = if ($UseUnicode) { "👨‍💼" } else { "[ADMIN]" }
+$EmojiVendorPortal = if ($UseUnicode) { "🏪" } else { "[VENDOR]" }
+$EmojiMobileApp = if ($UseUnicode) { "📱" } else { "[MOBILE]" }
+$EmojiRocket = if ($UseUnicode) { "🚀" } else { "[APP]" }
+$EmojiHospital = if ($UseUnicode) { "🏥" } else { "[HEALTH]" }
+$EmojiWrench = if ($UseUnicode) { "🔧" } else { "[TOOL]" }
+$EmojiPerson = if ($UseUnicode) { "👤" } else { "[USER]" }
+$EmojiCreditCard = if ($UseUnicode) { "💳" } else { "[PAY]" }
+$EmojiPackage = if ($UseUnicode) { "📦" } else { "[ORDER]" }
+$EmojiBarChart = if ($UseUnicode) { "📊" } else { "[DATA]" }
+$EmojiTrendingUp = if ($UseUnicode) { "📈" } else { "[ANALYTICS]" }
+$EmojiBell = if ($UseUnicode) { "🔔" } else { "[NOTIFY]" }
+$EmojiFileCabinet = if ($UseUnicode) { "🗃️" } else { "[DB]" }
+$EmojiTarget = if ($UseUnicode) { "🎯" } else { "[METRICS]" }
 
 # Global variables
 $Global:FrontendProcesses = @()
@@ -248,7 +359,7 @@ function Start-BackendServices {
             Write-Status "Backend services started successfully" "SUCCESS"
             
             # Wait for critical endpoints to be ready before continuing
-            Write-Status "⏳ Waiting for critical endpoints to be ready..." "INFO"
+            Write-Status "$EmojiHourglass Waiting for critical endpoints to be ready..." "INFO"
             Write-Status "  Checking http://localhost:8000/api/v1/health" "INFO"
             Write-Status "  Checking http://localhost:3000" "INFO"
             
@@ -257,12 +368,12 @@ function Start-BackendServices {
                 & npx wait-on http://localhost:8000/api/v1/health http://localhost:3000 --timeout 60000 --interval 2000 --log
                 
                 if ($LASTEXITCODE -eq 0) {
-                    Write-Status "✅ Critical endpoints are ready" "SUCCESS"
+                    Write-Status "$EmojiCheckMark Critical endpoints are ready" "SUCCESS"
                 } else {
-                    Write-Status "⚠️  Some endpoints may not be ready, continuing anyway..." "WARNING"
+                    Write-Status "$EmojiWarning Some endpoints may not be ready, continuing anyway..." "WARNING"
                 }
             } catch {
-                Write-Status "⚠️  Wait-on check failed: $($_.Exception.Message)" "WARNING"
+                Write-Status "$EmojiWarning Wait-on check failed: $($_.Exception.Message)" "WARNING"
                 Write-Status "   Continuing with startup..." "INFO"
             }
             
@@ -485,21 +596,21 @@ function Start-SpecificFrontend {
 
 function Show-FrontendUrls {
     Write-Host "`nFRONTEND APPLICATIONS:" -ForegroundColor Yellow
-    Write-Host "🌐 Customer Web:    http://localhost:3000" -ForegroundColor Cyan
-    Write-Host "👨‍💼 Admin Dashboard: http://localhost:3001" -ForegroundColor Cyan
-    Write-Host "🏪 Vendor Portal:   http://localhost:3002" -ForegroundColor Cyan
-    Write-Host "📱 Mobile App:      http://localhost:19006" -ForegroundColor Cyan
+    Write-Host "${EmojiCustomerWeb} Customer Web:    http://localhost:3000" -ForegroundColor Cyan
+    Write-Host "${EmojiAdminDashboard} Admin Dashboard: http://localhost:3001" -ForegroundColor Cyan
+    Write-Host "${EmojiVendorPortal} Vendor Portal:   http://localhost:3002" -ForegroundColor Cyan
+    Write-Host "${EmojiMobileApp} Mobile App:      http://localhost:19006" -ForegroundColor Cyan
 }
 
 function Show-SingleAppUrl {
     param([string]$AppName, [int]$Port)
     
     $emoji = switch ($AppName) {
-        "customer-web" { "🌐" }
-        "admin-dashboard" { "👨‍💼" }
-        "vendor-portal" { "🏪" }
-        "mobile-app" { "📱" }
-        default { "🚀" }
+        "customer-web" { $EmojiCustomerWeb }
+        "admin-dashboard" { $EmojiAdminDashboard }
+        "vendor-portal" { $EmojiVendorPortal }
+        "mobile-app" { $EmojiMobileApp }
+        default { $EmojiRocket }
     }
     
     Write-Host "`n$emoji $AppName is running at: http://localhost:$Port" -ForegroundColor Green
@@ -508,21 +619,23 @@ function Show-SingleAppUrl {
 function Invoke-HealthCheck {
     Write-Section "HEALTH CHECKS"
     
-    $healthEndpoints = @(
-        @{ Name = "User Service"; Url = "http://localhost:8001/api/v1/health" },
-        @{ Name = "Payment Service"; Url = "http://localhost:7000/api/v1/health" },
-        @{ Name = "Order Service"; Url = "http://localhost:8003/api/v1/health" },
-        @{ Name = "Analytics Service"; Url = "http://localhost:9000/health/" },
-        @{ Name = "Notification Service"; Url = "http://localhost:9001/api/v1/health" },
-        @{ Name = "Product Catalog"; Url = "http://localhost:8000/docs" }
-    )
+    # Import service endpoints configuration
+    . "$PSScriptRoot/service-endpoints.ps1"
     
-    foreach ($endpoint in $healthEndpoints) {
-        try {
-            $response = Invoke-RestMethod -Uri $endpoint.Url -Method Get -TimeoutSec 5 -ErrorAction Stop
-            Write-Status "✅ $($endpoint.Name): Healthy" "SUCCESS"
-        } catch {
-            Write-Status "❌ $($endpoint.Name): Unhealthy ($($_.Exception.Message))" "ERROR"
+    # Load environment variables
+    $envVars = Get-EnvVariables
+    # Get service endpoints
+    $serviceEndpoints = Get-ServiceEndpoints -EnvVars $envVars
+    
+    # Perform health checks using GetEnumerator()
+    foreach ($check in $serviceEndpoints.GetEnumerator()) {
+        $serviceName = $check.Key -replace "-", " " | ForEach-Object { (Get-Culture).TextInfo.ToTitleCase($_.ToLower()) }
+        $result = Test-ServiceHealth -ServiceName $check.Key -Url $check.Value
+        
+        if ($result.Success) {
+            Write-Status "${EmojiCheckMark} ${serviceName}: Healthy" "SUCCESS"
+        } else {
+            Write-Status "${EmojiCrossMark} ${serviceName}: Unhealthy ($($result.Message))" "ERROR"
         }
     }
     
@@ -530,15 +643,15 @@ function Invoke-HealthCheck {
     Write-Host "`nFRONTEND STATUS:" -ForegroundColor Yellow
     foreach ($app in $Global:FrontendProcesses) {
         if ($app.Process -and !$app.Process.HasExited) {
-            Write-Status "✅ $($app.Name): Running (PID: $($app.Process.Id))" "SUCCESS"
+            Write-Status "${EmojiCheckMark} $($app.Name): Running (PID: $($app.Process.Id))" "SUCCESS"
         } else {
-            Write-Status "❌ $($app.Name): Not running" "ERROR"
+            Write-Status "${EmojiCrossMark} $($app.Name): Not running" "ERROR"
         }
     }
 }
 
 function Start-EnhancedHealthMonitoring {
-    Write-Status "🏥 Starting enhanced health check monitoring..." "INFO"
+    Write-Status "$EmojiHospital Starting enhanced health check monitoring..." "INFO"
     
     $healthCheckJob = Start-Job -ScriptBlock {
         param($ScriptRoot)
@@ -553,23 +666,23 @@ function Start-EnhancedHealthMonitoring {
                 $failureLines = $healthOutput | Where-Object { $_ -match "❌|Health check failed|No services running" }
                 
                 if ($failureLines) {
-                    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ HEALTH CHECK ALERTS:" -ForegroundColor Red
+                    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ${EmojiCrossMark} HEALTH CHECK ALERTS:" -ForegroundColor Red
                     foreach ($line in $failureLines) {
-                        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ $line" -ForegroundColor Red
+                        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] $EmojiCrossMark $line" -ForegroundColor Red
                     }
                 }
                 
                 # Also check container status directly for quicker detection
                 $unhealthyContainers = docker ps --filter "health=unhealthy" --format "{{.Names}} ({{.Status}})" 2>$null
                 if ($unhealthyContainers) {
-                    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ UNHEALTHY CONTAINERS DETECTED:" -ForegroundColor Red
+                    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ${EmojiCrossMark} UNHEALTHY CONTAINERS DETECTED:" -ForegroundColor Red
                     $unhealthyContainers | ForEach-Object {
-                        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ Container: $_" -ForegroundColor Red
+                        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ${EmojiCrossMark} Container: $_" -ForegroundColor Red
                     }
                 }
                 
             } catch {
-                Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ Health check script error: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ${EmojiCrossMark} Health check script error: $($_.Exception.Message)" -ForegroundColor Red
             }
         }
         
@@ -580,7 +693,7 @@ function Start-EnhancedHealthMonitoring {
         }
     } -ArgumentList $PSScriptRoot
     
-    Write-Status "✅ Enhanced health check monitoring started (15s interval)" "SUCCESS"
+    Write-Status "$EmojiCheckMark Enhanced health check monitoring started (15s interval)" "SUCCESS"
     return $healthCheckJob
 }
 
@@ -593,7 +706,7 @@ function Show-ServiceStatus {
         $services = docker compose -f infrastructure/docker-compose.dev.yml ps --format json | ConvertFrom-Json
         if ($services) {
             foreach ($service in $services) {
-                $status = if ($service.State -eq "running") { "✅" } else { "❌" }
+                $status = if ($service.State -eq "running") { $EmojiCheckMark } else { $EmojiCrossMark }
                 $color = if ($service.State -eq "running") { "Green" } else { "Red" }
                 Write-Host "  $status $($service.Service): $($service.State)" -ForegroundColor $color
             }
@@ -609,9 +722,9 @@ function Show-ServiceStatus {
     if ($Global:FrontendProcesses.Count -gt 0) {
         foreach ($app in $Global:FrontendProcesses) {
             if ($app.Process -and !$app.Process.HasExited) {
-                Write-Host "  ✅ $($app.Name): Running (PID: $($app.Process.Id), Port: $($app.Port))" -ForegroundColor Green
+                Write-Status "${EmojiCheckMark} $($app.Name): Running (PID: $($app.Process.Id))" "SUCCESS"
             } else {
-                Write-Host "  ❌ $($app.Name): Stopped" -ForegroundColor Red
+                Write-Status "${EmojiCrossMark} $($app.Name): Not running" "ERROR"
             }
         }
     } else {
@@ -725,6 +838,7 @@ if (!(Initialize-Environment)) {
 # Register shutdown handler
 Register-ShutdownHandler
 
+
 # Determine what to start
 $startBackend = $Backend -or $FullStack
 $startFrontend = $Frontend -or $FullStack
@@ -760,30 +874,59 @@ if ($startFrontend) {
     if ($MobileApp) { Start-SpecificFrontend "mobile-app" }
 }
 
+# Function to show login credentials
+function Show-LoginCredentials {
+    $credentials = @(
+        [PSCustomObject]@{Service='PostgreSQL (Main)'; URL='localhost:5432'; Username='ecomarket'; Password='ecomarket_secure_password_2024'},
+        [PSCustomObject]@{Service='PostgreSQL (Orders)'; URL='localhost:5434'; Username='orders_user'; Password='orders_password'},
+        [PSCustomObject]@{Service='MongoDB'; URL='localhost:27017'; Username='eco'; Password='eco_pass'},
+        [PSCustomObject]@{Service='Redis (Main)'; URL='localhost:6379'; Username='N/A'; Password='N/A'},
+        [PSCustomObject]@{Service='Redis (Orders)'; URL='localhost:6380'; Username='N/A'; Password='N/A'},
+        [PSCustomObject]@{Service='pgAdmin'; URL='http://localhost:8080'; Username='admin@ecomarket.dev'; Password='admin'},
+        [PSCustomObject]@{Service='Redis Commander'; URL='http://localhost:8082'; Username='N/A'; Password='N/A'}
+    )
+    
+    Write-Host ""
+    Write-Host "" + ("=" * 130) -ForegroundColor Cyan
+    Write-Host "  LOGIN CREDENTIALS" -ForegroundColor Yellow -BackgroundColor DarkBlue
+    Write-Host "" + ("=" * 130) -ForegroundColor Cyan
+    
+    $formatString = "  {0,-20} {1,-25} {2,-25} {3,-30}"
+    Write-Host ($formatString -f 'SERVICE', 'URL', 'USERNAME', 'PASSWORD') -ForegroundColor Yellow
+    Write-Host "" + ("-" * 130) -ForegroundColor Gray
+    
+    foreach ($cred in $credentials) {
+        Write-Host ($formatString -f $cred.Service, $cred.URL, $cred.Username, $cred.Password) -ForegroundColor Green
+    }
+    Write-Host "" + ("=" * 130) -ForegroundColor Cyan
+}
+
 # Show final status
 Write-Section "DEVELOPMENT ENVIRONMENT READY"
 
 if ($startBackend) {
     Write-Host "BACKEND SERVICES:" -ForegroundColor Yellow
-    Write-Host "🔧 Product Catalog:    http://localhost:8000" -ForegroundColor Cyan
-    Write-Host "👤 User Service:       http://localhost:8001" -ForegroundColor Cyan  
-    Write-Host "💳 Payment Service:    http://localhost:7000" -ForegroundColor Cyan
-    Write-Host "📦 Order Service:      http://localhost:8003" -ForegroundColor Cyan
-    Write-Host "📊 Inventory Service:  http://localhost:8005" -ForegroundColor Cyan
-    Write-Host "📈 Analytics Service:  http://localhost:9000" -ForegroundColor Cyan
-    Write-Host "🔔 Notification:       http://localhost:9001" -ForegroundColor Cyan
-    Write-Host "🗃️  pgAdmin:            http://localhost:8080 (admin@ecomarket.dev / admin)" -ForegroundColor Cyan
-    Write-Host "🔧 Redis Commander:    http://localhost:8082" -ForegroundColor Cyan
+    Write-Host "${EmojiWrench} Product Catalog:    http://localhost:8000" -ForegroundColor Cyan
+    Write-Host "${EmojiPerson} User Service:       http://localhost:8001" -ForegroundColor Cyan
+    Write-Host "${EmojiCreditCard} Payment Service:    http://localhost:7000" -ForegroundColor Cyan
+    Write-Host "${EmojiPackage} Order Service:      http://localhost:8003" -ForegroundColor Cyan
+    Write-Host "${EmojiBarChart} Inventory Service:  http://localhost:8005" -ForegroundColor Cyan
+    Write-Host "${EmojiTrendingUp} Analytics Service:  http://localhost:9000" -ForegroundColor Cyan
+    Write-Host "$EmojiBell Notification:       http://localhost:9001" -ForegroundColor Cyan
+    Write-Host "$EmojiFileCabinet pgAdmin:            http://localhost:8080 (admin@ecomarket.dev / admin)" -ForegroundColor Cyan
+    Write-Host "$EmojiWrench Redis Commander:    http://localhost:8082" -ForegroundColor Cyan
     
     if ($Monitoring) {
-        Write-Host "📊 Grafana:            http://localhost:3000 (admin / admin)" -ForegroundColor Cyan
-        Write-Host "🎯 Prometheus:         http://localhost:9090" -ForegroundColor Cyan
+        Write-Host "$EmojiBarChart Grafana:            http://localhost:3000 (admin / admin)" -ForegroundColor Cyan
+        Write-Host "$EmojiTarget Prometheus:         http://localhost:9090" -ForegroundColor Cyan
     }
 }
 
 if ($startFrontend -or $startSpecific) {
     Show-FrontendUrls
 }
+
+Show-LoginCredentials
 
 Write-Host "`nCOMMANDS:" -ForegroundColor Yellow
 Write-Host "  .\dev.ps1 -HealthCheck    # Check service health" -ForegroundColor Gray

@@ -305,7 +305,7 @@ class InventorySearchParams(BaseModel):
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=50, ge=1, le=500)
     sort_by: str = Field(default="product_id")
-    sort_order: str = Field(default="asc", regex="^(asc|desc)$")
+    sort_order: str = Field(default="asc", pattern="^(asc|desc)$")
 
 
 class InventoryListResponse(BaseModel):

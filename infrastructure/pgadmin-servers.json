@@ -1,0 +1,22 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PostgreSQL (Main)",
+      "Group": "EcoMarket",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "ecomarket_dev",
+      "Username": "ecomarket",
+      "SSLMode": "prefer"
+    },
+    "2": {
+      "Name": "PostgreSQL (Orders)",
+      "Group": "EcoMarket",
+      "Host": "postgres-orders",
+      "Port": 5432,
+      "MaintenanceDB": "orders_db",
+      "Username": "orders_user",
+      "SSLMode": "prefer"
+    }
+  }
+}
