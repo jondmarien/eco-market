@@ -1,18 +1,33 @@
 {
   "name": "issessionswarp2.0demo",
   "version": "1.0.0",
-  "description": "",
+  "description": "[![Quick Start](https://img.shields.io/badge/Quick%20Start-Get%20Started-brightgreen?style=for-the-badge)](docs/dev-environment.md)",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "python -m pip install pre-commit && pre-commit install --hook-type pre-commit --hook-type commit-msg"
+    "prepare": "python -m pip install pre-commit && pre-commit install --hook-type pre-commit --hook-type commit-msg",
+    "lint:md": "markdownlint \"**/*.md\" --ignore node_modules",
+    "lint:md:fix": "markdownlint \"**/*.md\" --ignore node_modules --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "devDependencies": {}
+  "devDependencies": {
+    "markdownlint-cli": "^0.45.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jondmarien/eco-market.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jondmarien/eco-market/issues"
+  },
+  "homepage": "https://github.com/jondmarien/eco-market#readme",
+  "dependencies": {
+    "axios": "^1.10.0"
+  }
 }

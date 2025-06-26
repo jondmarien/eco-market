@@ -12,7 +12,7 @@ import {
   UpdateUserForm,
 } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8001/api/v1';
 
 // Create axios instance
 const api = axios.create({
@@ -34,8 +34,18 @@ api.interceptors.request.use((config) => {
 // Auth API
 export const authAPI = {
   login: async (credentials: LoginCredentials): Promise<AuthUser> => {
-    const response = await api.post<ApiResponse<AuthUser>>('/auth/admin/login', credentials);
-    return response.data.data;
+    const response = await api.post('/auth/login', credentials);
+    const loginData = response.data;
+    
+    // Extract token from response (User Service returns 'accessToken' in data)
+    const token = loginData.data?.accessToken || loginData.accessToken || loginData.token;
+    const user = loginData.data?.user || loginData.user || loginData.data;
+    
+    // Return in format expected by AuthContext
+    return {
+      ...user,
+      token: token
+    };
   },
   
   logout: async (): Promise<void> => {
@@ -93,7 +103,7 @@ export const productsAPI = {
     Object.entries(productData).forEach(([key, value]) => {
       if (key === 'images' && value) {
         Array.from(value).forEach((file) => {
-          formData.append('images', file);
+          formData.append('images', file as File);
         });
       } else {
         formData.append(key, value.toString());
