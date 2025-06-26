@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "EcoMarket",
+    "slug": "ecomarket-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#22c55e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ecomarket.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan barcodes for product lookup and to take photos for reviews.",
+        "NSLocationWhenInUseUsageDescription": "This app uses location to find nearby stores and calculate shipping costs.",
+        "NSFaceIDUsageDescription": "Use Face ID to authenticate and secure your account."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#22c55e"
+      },
+      "package": "com.ecomarket.mobile",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "VIBRATE",
+        "USE_FINGERPRINT",
+        "USE_BIOMETRIC"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-notifications",
+      "@stripe/stripe-react-native",
+      "expo-secure-store",
+      "expo-camera",
+      "expo-barcode-scanner",
+      "expo-location"
+    ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#22c55e"
+    },
+    "scheme": "ecomarket",
+    "extra": {
+      "eas": {
+        "projectId": "ecomarket-mobile-app"
+      }
+    }
+  }
+}
