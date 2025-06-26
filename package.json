@@ -17,7 +17,10 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "markdownlint-cli": "^0.45.0"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "markdownlint-cli": "^0.45.0",
+    "wait-on": "^7.0.1"
   },
   "repository": {
     "type": "git",
