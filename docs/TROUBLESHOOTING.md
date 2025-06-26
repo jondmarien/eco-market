@@ -453,7 +453,7 @@ Get-ExecutionPolicy
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Or bypass for specific script
-powershell -ExecutionPolicy Bypass -File .\scripts\up.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1 -FullStack
 ```
 
 ### Problem: WSL Integration Issues

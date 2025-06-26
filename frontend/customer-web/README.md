@@ -26,7 +26,7 @@ A modern, responsive web application for the EcoMarket sustainable e-commerce pl
 
 ### Prerequisites
 - Node.js 18 or higher
-- npm, yarn, or pnpm
+- npm or yarn
 
 ### Installation
 

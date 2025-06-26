@@ -25,19 +25,19 @@ This document provides a comprehensive inventory and gap analysis of the EcoMark
 
 ### 2. Scripts Directory (`scripts/`)
 
-#### `scripts/up.ps1`
+#### `scripts/dev.ps1`
 - **Purpose**: Main infrastructure startup script with flexible options
 - **Primary Docker Compose File**: `../infrastructure/docker-compose.dev.yml`
 - **Optional Monitoring**: `../infrastructure/docker-compose.monitoring.yml`
 - **Supported Flags**:
-  - `-AllServices`: Start complete infrastructure
+  - `-FullStack`: Start complete infrastructure
   - `-Monitoring`: Include Prometheus/Grafana stack
   - `-ProductCatalog`, `-OrderService`, `-InventoryService`: Individual service flags
   - `-ComposeFiles`: Explicit compose file specification
 
 #### `scripts/start-all.ps1`
 - **Purpose**: Convenience script that starts complete environment with monitoring
-- **Implementation**: Wrapper around `up.ps1 -AllServices -Monitoring`
+- **Implementation**: Wrapper around `dev.ps1 -FullStack -Monitoring`
 
 ## Docker Compose Infrastructure
 
@@ -84,8 +84,7 @@ This document provides a comprehensive inventory and gap analysis of the EcoMark
 
 ### Key Findings
 
-**❌ No pnpm Workspace Configuration:**
-- The task mentioned pnpm filter commands, but this project does NOT use pnpm workspaces
+**❌ No Workspace Configuration:**
 - Each frontend application has its own `package.json` and must be started individually
 - Correct commands are:
   - `cd frontend/customer-web && npm run dev`
@@ -136,7 +135,7 @@ This document provides a comprehensive inventory and gap analysis of the EcoMark
 **Alternative Individual Service Files:**
 - `product-catalog-service/docker-compose.yml`
 - `services/order-service/docker-compose.yml`
-- Individual service docker-compose files (referenced in `up.ps1`)
+- Individual service docker-compose files (referenced in deprecated `up.ps1`)
 
 ## Recommendations & Gap Resolution
 
@@ -164,7 +163,7 @@ Consider adding health endpoints for:
 
 ## New Orchestrator Features
 
-The new `dev.ps1` orchestrator addresses all identified gaps:
+The new `dev.ps1` orchestrator (replacing the deprecated `up.ps1`) addresses all identified gaps:
 
 ✅ **Corrected Health Check Endpoints**
 ✅ **Proper Frontend Startup Commands** 

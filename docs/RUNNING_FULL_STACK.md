@@ -21,59 +21,44 @@ docker --version
 docker compose --version
 ```
 
-## Step 2: Run the Automated Setup Script
+## Step 2: Start the Full Stack
 
 ### Quick Start (Recommended)
 ```powershell
-./scripts/up.ps1
+# Start everything with monitoring
+.\scripts\dev.ps1 -FullStack -Monitoring
 ```
 
-### Missing Compose File Workaround
+### Granular Usage Options
 
-**Note**: The `up.ps1` script references `../infrastructure/docker-compose.dev.yml` which doesn't exist in the current project structure. If you encounter this error, you have two options:
-
-#### Option A: Create the Missing Infrastructure File
-Create the missing docker-compose file by combining all services:
-
+#### Backend Services Only
 ```powershell
-# Create infrastructure directory
-mkdir infrastructure -ErrorAction SilentlyContinue
-
-# You would need to manually create a combined docker-compose.dev.yml file
-# that includes all services from the individual service directories
+# Start all backend services without frontend
+.\scripts\dev.ps1 -Backend
 ```
 
-#### Option B: Use Manual Alternative (Recommended)
-Proceed to Step 3 for the manual approach that works with the current project structure.
-
-## Step 3: Manual Alternative - Start Individual Services
-
-Since the project uses individual docker-compose files per service, start them manually:
-
-### Start Product Catalog Service
+#### Individual Services
 ```powershell
-docker compose -f product-catalog-service/docker-compose.yml up -d
+# Start only Product Catalog Service
+.\scripts\dev.ps1 -ProductCatalog
+
+# Start only Order Service
+.\scripts\dev.ps1 -OrderService
+
+# Start only Frontend (requires backend services to be running)
+.\scripts\dev.ps1 -Frontend
 ```
 
-### Start Order Service  
+#### Additional Options
 ```powershell
-docker compose -f services/order-service/docker-compose.yml up -d
-```
+# Start with automatic health checks
+.\scripts\dev.ps1 -FullStack -HealthCheck
 
-### Start Frontend (Development Mode)
-```powershell
-cd frontend/customer-web
-npm install
-npm run dev
-```
+# Start with monitoring and health checks
+.\scripts\dev.ps1 -FullStack -Monitoring -HealthCheck
 
-### Start All Services at Once
-```powershell
-# Start all backend services
-docker compose -f product-catalog-service/docker-compose.yml -f services/order-service/docker-compose.yml up -d
-
-# In a separate terminal, start the frontend
-cd frontend/customer-web && npm run dev
+# View all available options
+.\scripts\dev.ps1 -Help
 ```
 
 ## Expected Port Mappings

@@ -9,19 +9,31 @@ EcoMarket is a sustainable e-commerce platform built with a microservices archit
 Get up and running with the EcoMarket development environment in minutes:
 
 ```powershell
-# 1. Clone the repository
-git clone <repository-url>
-cd ISSessionsWarp2.0Demo
+# 1. Clone
+git clone <repo>
+cd EcoMarket
 
-# 2. Set up environment variables
+# 2. Configure environment
 cp .env.template .env
-# Edit .env with your configuration
+# edit .env
 
-# 3. Start the development stack
-.\scripts\up.ps1
+# 3. Start full stack
+.\scripts\dev.ps1 -FullStack
 ```
 
-For detailed setup instructions, see [Development Environment Setup](docs/dev-environment.md).
+### dev.ps1 Orchestrator
+
+The `dev.ps1` script is a key component in the EcoMarket development environment, offering full control over backend services and frontend applications:
+
+- **Unified Control** over both backend and frontend services.
+- **Health Checks**, **Monitoring**, and **Logging** for a robust development setup.
+- Modular capabilities to start with specific services or the entire stack.
+
+For a comprehensive guide, please refer to the [dev-ps1 Orchestrator Guide](docs/dev-ps1-orchestrator.md).
+
+### Migration from up.ps1
+
+The previous `scripts/up.ps1` is deprecated. Please use `scripts/dev.ps1` with the `-FullStack` or appropriate flags instead.
 
 ## 📁 Project Structure
 
@@ -46,16 +58,35 @@ ecomarket/
 
 1. **Environment Variables**: Copy `.env.template` to `.env` and configure your settings
 2. **Docker**: Ensure Docker Desktop is running
-3. **Start Services**: Run `.\scripts\up.ps1` to start the development stack
+3. **Start Services**: Run `.\scripts\dev.ps1 -FullStack` to start the development stack
 
 ### Available Scripts
 
-- `.\scripts\up.ps1` - Start the development environment
+- `.\scripts\dev.ps1` - Comprehensive development environment orchestration (see Quick Start for capabilities)
 
 ## 📖 Documentation
 
+### 🚀 Getting Started
 - [Development Environment Setup](docs/dev-environment.md) - Complete setup guide
+- [dev.ps1 Orchestrator Guide](docs/dev-ps1-orchestrator.md) - **Comprehensive development environment orchestrator** (replaces deprecated up.ps1)
+- [Quick Start with Docker Compose](docs/DOCKER_COMPOSE_QUICK_START.md) - Fast Docker-based setup
+
+### 🏗️ Architecture & Development
 - [Repository Strategy](docs/repository-strategy.md) - Mono-repo approach and rationale
+- [Core Sections Overview](docs/CORE_SECTIONS.md) - Project structure and components
+- [Development Guide Structure](docs/development-guide-structure.md) - Developer documentation organization
+
+### 🔧 Operations & Troubleshooting
+- [Running Full Stack](docs/RUNNING_FULL_STACK.md) - Complete stack deployment
+- [Service Management](docs/SERVICE-MANAGEMENT.md) - Managing microservices
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Docker Compose Resolution Guide](docs/DOCKER_COMPOSE_RESOLUTION_GUIDE.md) - Docker-specific troubleshooting
+- [Development Environment Inventory](docs/DEVELOPMENT_ENVIRONMENT_INVENTORY.md) - Environment assessment
+
+### 📋 Project Management
+- [Contributing Guidelines](docs/CONTRIBUTING.md) - How to contribute to the project
+- [Agent Coordination](docs/AGENT_COORDINATION.md) - AI agent collaboration guidelines
+- [API Documentation Access](docs/API_DOCUMENTATION_ACCESS.md) - API reference and access
 
 ## 🏗️ Architecture
 

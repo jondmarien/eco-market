@@ -253,7 +253,7 @@ Enhance the startup script to support multiple compose file strategies and provi
 
 ### Implementation
 
-#### Updated scripts/up.ps1
+#### Updated scripts/dev.ps1
 
 ```powershell
 Param(
@@ -273,7 +273,7 @@ function Show-Help {
 EcoMarket Development Environment Startup Script
 
 USAGE:
-    .\up.ps1 [OPTIONS]
+    .\dev.ps1 [OPTIONS]
 
 OPTIONS:
     -ComposeFiles <string[]>     Explicit list of compose files to use
@@ -288,19 +288,19 @@ OPTIONS:
 
 EXAMPLES:
     # Start all services (requires docker-compose.dev.yml)
-    .\up.ps1 -AllServices
+    .\dev.ps1 -FullStack
 
     # Start specific services using individual compose files
-    .\up.ps1 -ProductCatalog
+    .\dev.ps1 -ProductCatalog
 
     # Start with monitoring
-    .\up.ps1 -AllServices -Monitoring
+    .\dev.ps1 -FullStack -Monitoring
 
     # Use explicit compose files
-    .\up.ps1 -ComposeFiles @("../product-catalog-service/docker-compose.yml", "../services/order-service/docker-compose.yml")
+    .\dev.ps1 -ComposeFiles @("../product-catalog-service/docker-compose.yml", "../services/order-service/docker-compose.yml")
 
     # Start specific services from all-in-one compose
-    .\up.ps1 -ComposeFiles @("../infrastructure/docker-compose.dev.yml") -Services "postgres-catalog,redis-catalog,product-catalog"
+    .\dev.ps1 -ComposeFiles @("../infrastructure/docker-compose.dev.yml") -Services "postgres-catalog,redis-catalog,product-catalog"
 
 COMPOSE FILE PRIORITY:
     1. Explicit -ComposeFiles parameter
@@ -357,7 +357,7 @@ if ($MissingFiles.Count -gt 0) {
     Write-Host "2. Use individual service compose files with flags like -ProductCatalog, -OrderService" -ForegroundColor Yellow
     Write-Host "3. Use -ComposeFiles with existing compose file paths" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "Run '.\up.ps1 -Help' for more information" -ForegroundColor Cyan
+    Write-Host "Run '.\dev.ps1 -Help' for more information" -ForegroundColor Cyan
     exit 1
 }
 
@@ -416,25 +416,25 @@ Create these additional convenience scripts:
 **scripts/start-catalog.ps1**
 ```powershell
 # Quick start for Product Catalog service only
-.\up.ps1 -ProductCatalog
+.\dev.ps1 -ProductCatalog
 ```
 
 **scripts/start-orders.ps1**
 ```powershell
 # Quick start for Order service only
-.\up.ps1 -OrderService
+.\dev.ps1 -OrderService
 ```
 
 **scripts/start-inventory.ps1**
 ```powershell
 # Quick start for Inventory service only
-.\up.ps1 -InventoryService
+.\dev.ps1 -InventoryService
 ```
 
 **scripts/start-all.ps1**
 ```powershell
 # Start all services with monitoring
-.\up.ps1 -AllServices -Monitoring
+.\dev.ps1 -FullStack -Monitoring
 ```
 
 ### Benefits of Solution B

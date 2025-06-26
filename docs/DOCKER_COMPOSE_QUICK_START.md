@@ -8,7 +8,7 @@ The EcoMarket development environment now supports flexible startup options to a
 ### Start Everything (Recommended for new developers)
 ```powershell
 cd scripts
-.\up.ps1 -AllServices
+.\dev.ps1 -FullStack
 ```
 
 ### Start Individual Services
@@ -29,10 +29,10 @@ cd scripts
 ### Custom Compose Files
 ```powershell
 # Use specific compose files
-.\up.ps1 -ComposeFiles @("../product-catalog-service/docker-compose.yml", "../services/order-service/docker-compose.yml")
+.\dev.ps1 -Services "ProductCatalog,OrderService"
 
 # Start specific services from main compose
-.\up.ps1 -Services "postgres,redis,product-catalog-service"
+.\dev.ps1 -Backend -Services "postgres,redis,product-catalog-service"
 ```
 
 ## Available Services After Startup
@@ -65,8 +65,8 @@ ERROR: The following compose files are missing:
 
 **Solutions:**
 1. The file exists at `infrastructure/docker-compose.dev.yml` - check your working directory
-2. Use individual service flags: `.\up.ps1 -ProductCatalog -OrderService`
-3. Run `.\up.ps1 -Help` for more options
+2. Use individual service flags: `.\dev.ps1 -ProductCatalog -OrderService`
+3. Run `.\dev.ps1 -Help` for more options
 
 ### Port conflicts
 If you see port binding errors:
@@ -78,12 +78,12 @@ If you see port binding errors:
 1. Check Docker Desktop is running
 2. Verify `.env` file exists and has correct values
 3. Check logs: `docker compose logs [service-name]`
-4. Restart with: `docker compose down && .\up.ps1 -AllServices`
+4. Restart with: `docker compose down && .\dev.ps1 -FullStack`
 
 ## Getting Help
 ```powershell
 # Show all available options
-.\up.ps1 -Help
+.\dev.ps1 -Help
 
 # Check service status
 docker compose ps
