@@ -1,0 +1,182 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: user-service
+    url: http://user-service:3001
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "http://localhost:3000"
+            - "https://ecomarket.app"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - Authorization
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+      - name: prometheus
+        config:
+          per_consumer: true
+          status_code_metrics: true
+          latency_metrics: true
+
+  - name: product-service
+    url: http://product-service:8000
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "http://localhost:3000"
+            - "https://ecomarket.app"
+      - name: rate-limiting
+        config:
+          minute: 200
+          hour: 2000
+      - name: prometheus
+
+  - name: order-service
+    url: http://order-service:8080
+    plugins:
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 150
+          hour: 1500
+      - name: prometheus
+
+  - name: payment-service
+    url: http://payment-service:4000
+    plugins:
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 50
+          hour: 500
+      - name: prometheus
+      - name: request-size-limiting
+        config:
+          allowed_payload_size: 128
+
+  - name: inventory-service
+    url: http://inventory-service:5000
+    plugins:
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+      - name: prometheus
+
+routes:
+  # User Service Routes
+  - name: user-auth
+    service: user-service
+    paths:
+      - /api/v1/auth
+    methods:
+      - GET
+      - POST
+
+  - name: user-profiles
+    service: user-service
+    paths:
+      - /api/v1/users
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+
+  # Product Service Routes
+  - name: products
+    service: product-service
+    paths:
+      - /api/v1/products
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+
+  - name: product-search
+    service: product-service
+    paths:
+      - /api/v1/products/search
+    methods:
+      - GET
+
+  # Order Service Routes
+  - name: orders
+    service: order-service
+    paths:
+      - /api/v1/orders
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+    plugins:
+      - name: jwt
+
+  # Payment Service Routes
+  - name: payments
+    service: payment-service
+    paths:
+      - /api/v1/payments
+    methods:
+      - POST
+      - GET
+    plugins:
+      - name: jwt
+
+  # Inventory Service Routes
+  - name: inventory
+    service: inventory-service
+    paths:
+      - /api/v1/inventory
+    methods:
+      - GET
+      - POST
+      - PUT
+    plugins:
+      - name: jwt
+
+plugins:
+  - name: prometheus
+    config:
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true
+
+consumers:
+  - username: admin-dashboard
+    custom_id: admin-dashboard
+    jwt_secrets:
+      - key: admin-dashboard-key
+        secret: admin-dashboard-secret
+
+  - username: customer-web-app
+    custom_id: customer-web-app
+    jwt_secrets:
+      - key: customer-web-app-key
+        secret: customer-web-app-secret

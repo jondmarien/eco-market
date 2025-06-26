@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecomarket
+  labels:
+    name: ecomarket
+    purpose: microservices-platform
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecomarket-secrets
+  namespace: ecomarket
+type: Opaque
+stringData:
+  # Database URLs
+  MONGODB_URL: "mongodb://mongodb-service:27017/ecomarket"
+  POSTGRESQL_URL: "postgres://postgres:password@postgresql-service:5432/ecomarket"
+  REDIS_URL: "redis://redis-service:6379"
+  
+  # API Keys
+  JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
+  STRIPE_SECRET_KEY: "sk_test_your_stripe_secret_key"
+  STRIPE_WEBHOOK_SECRET: "whsec_your_webhook_secret"
+  PAYPAL_CLIENT_SECRET: "your_paypal_client_secret"
+  
+  # Email Service
+  SENDGRID_API_KEY: "your_sendgrid_api_key"
+  
+  # External APIs
+  GOOGLE_CLIENT_SECRET: "your_google_oauth_secret"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecomarket-config
+  namespace: ecomarket
+data:
+  # Environment
+  NODE_ENV: "production"
+  PORT: "3000"
+  
+  # API Configuration
+  API_VERSION: "v1"
+  API_PREFIX: "/api/v1"
+  
+  # Service URLs (internal)
+  USER_SERVICE_URL: "http://user-service:3001"
+  PRODUCT_SERVICE_URL: "http://product-service:8000"
+  ORDER_SERVICE_URL: "http://order-service:8080"
+  PAYMENT_SERVICE_URL: "http://payment-service:4000"
+  INVENTORY_SERVICE_URL: "http://inventory-service:5000"
+  
+  # External URLs
+  FRONTEND_URL: "https://ecomarket.app"
+  ADMIN_URL: "https://admin.ecomarket.app"
+  
+  # Feature Flags
+  ENABLE_ANALYTICS: "true"
+  ENABLE_NOTIFICATIONS: "true"
+  ENABLE_CACHE: "true"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ecomarket-service-account
+  namespace: ecomarket
+automountServiceAccountToken: true
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: ecomarket
+  name: ecomarket-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ecomarket-role-binding
+  namespace: ecomarket
+subjects:
+- kind: ServiceAccount
+  name: ecomarket-service-account
+  namespace: ecomarket
+roleRef:
+  kind: Role
+  name: ecomarket-role
+  apiGroup: rbac.authorization.k8s.io

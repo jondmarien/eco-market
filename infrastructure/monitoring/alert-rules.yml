@@ -1,0 +1,165 @@
+groups:
+  - name: ecomarket.rules
+    rules:
+    # High-level service availability alerts
+    - alert: ServiceDown
+      expr: up == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Service {{ $labels.job }} is down"
+        description: "Service {{ $labels.job }} has been down for more than 1 minute."
+
+    # Kong API Gateway alerts
+    - alert: KongHighErrorRate
+      expr: rate(kong_http_status{code=~"5.."}[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Kong API Gateway high error rate"
+        description: "Kong is experiencing {{ $value }} 5xx errors per second."
+
+    - alert: KongHighLatency
+      expr: histogram_quantile(0.95, rate(kong_latency_bucket[5m])) > 1000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Kong API Gateway high latency"
+        description: "Kong 95th percentile latency is {{ $value }}ms."
+
+    # Application-specific alerts
+    - alert: HighMemoryUsage
+      expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage on {{ $labels.pod_name }}"
+        description: "Pod {{ $labels.pod_name }} is using {{ $value }}% of its memory limit."
+
+    - alert: HighCPUUsage
+      expr: (rate(container_cpu_usage_seconds_total[5m])) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage on {{ $labels.pod_name }}"
+        description: "Pod {{ $labels.pod_name }} is using {{ $value }}% CPU."
+
+    # Database connection alerts
+    - alert: DatabaseConnectionHigh
+      expr: mongodb_connections{state="current"} > 80
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High database connections"
+        description: "MongoDB has {{ $value }} current connections."
+
+    # Custom EcoMarket business logic alerts
+    - alert: HighOrderFailureRate
+      expr: rate(http_requests_total{job="order-service", code=~"5.."}[5m]) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High order failure rate"
+        description: "Order service is experiencing {{ $value }} failures per second."
+
+    - alert: PaymentServiceDown
+      expr: up{job="payment-service"} == 0
+      for: 30s
+      labels:
+        severity: critical
+      annotations:
+        summary: "Payment service is down"
+        description: "Payment service has been down for 30 seconds - immediate attention required."
+
+    - alert: InventoryLow
+      expr: inventory_stock_level < 10
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Low inventory for product {{ $labels.product_id }}"
+        description: "Product {{ $labels.product_id }} has only {{ $value }} items in stock."
+
+    # Infrastructure alerts
+    - alert: NodeDiskSpaceHigh
+      expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Node disk space is low"
+        description: "Node {{ $labels.instance }} has less than 10% disk space available."
+
+    - alert: NodeMemoryHigh
+      expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Node memory usage is high"
+        description: "Node {{ $labels.instance }} memory usage is {{ $value }}%."
+
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod is crash looping"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently."
+
+    # Performance degradation alerts
+    - alert: ResponseTimeHigh
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High response time for {{ $labels.job }}"
+        description: "95th percentile response time is {{ $value }} seconds."
+
+    - alert: ThroughputLow
+      expr: rate(http_requests_total[5m]) < 1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Low throughput for {{ $labels.job }}"
+        description: "Service {{ $labels.job }} is handling less than 1 request per second."
+
+  - name: business.rules
+    rules:
+    # Business-specific metrics and alerts
+    - alert: DailyOrdersLow
+      expr: increase(orders_total[24h]) < 10
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: "Daily orders are unusually low"
+        description: "Only {{ $value }} orders have been placed in the last 24 hours."
+
+    - alert: RevenueDrop
+      expr: rate(revenue_total[1h]) < 100
+      for: 2h
+      labels:
+        severity: warning
+      annotations:
+        summary: "Revenue rate has dropped"
+        description: "Hourly revenue rate is {{ $value }}, which is below the expected threshold."
+
+    - alert: UserRegistrationLow
+      expr: rate(user_registrations_total[1h]) < 1
+      for: 4h
+      labels:
+        severity: info
+      annotations:
+        summary: "User registration rate is low"
+        description: "Less than 1 user registration per hour for the last 4 hours."
