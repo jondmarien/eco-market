@@ -6,36 +6,35 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-eco-50 to-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-eco-600 to-eco-700 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Shop Sustainably,
-              <br />
-              <span className="text-eco-200">Live Responsibly</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-eco-100 mb-8 max-w-3xl mx-auto">
-              Discover eco-friendly products that make a difference for you and the planet.
-              Every purchase supports sustainable practices and reduces your carbon footprint.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/products"
-                className="btn-primary bg-white text-eco-600 hover:bg-eco-50 px-8 py-3 text-lg font-semibold rounded-lg transition-colors"
-              >
-                Shop Now
-              </Link>
-              <Link
-                href="/about"
-                className="border-2 border-white text-white hover:bg-white hover:text-eco-600 px-8 py-3 text-lg font-semibold rounded-lg transition-colors"
-              >
-                Learn More
-              </Link>
-            </div>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
-      </section>
+      <section className="relative bg-eco-50 py-20 flex flex-col items-center">
+  <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-20">
+    <Image src="/globe.svg" alt="Eco Globe" width={320} height={320} className="mx-auto" />
+  </div>
+  <div className="relative z-10 max-w-2xl w-full text-center mx-auto px-4">
+    <h1 className="text-4xl md:text-6xl font-bold mb-4 text-eco-700 font-sans">
+      Shop Sustainably,<br />
+      <span className="text-eco-500 font-light">Live Responsibly</span>
+    </h1>
+    <p className="text-lg md:text-xl text-eco-700 mb-8 font-light">
+      Discover eco-friendly products that make a difference for you and the planet.<br />
+      Every purchase supports sustainable practices and reduces your carbon footprint.
+    </p>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Link
+        href="/products"
+        className="px-8 py-3 text-lg rounded-full bg-eco-600 text-white hover:bg-eco-700 transition-colors font-semibold focus:outline-none focus:ring-2 focus:ring-eco-300"
+      >
+        Shop Now
+      </Link>
+      <Link
+        href="/about"
+        className="px-8 py-3 text-lg rounded-full border border-eco-600 text-eco-600 hover:bg-eco-100 transition-colors font-semibold focus:outline-none focus:ring-2 focus:ring-eco-300"
+      >
+        Learn More
+      </Link>
+    </div>
+  </div>
+</section>
 
       {/* Features Section */}
       <section className="py-16 bg-white">
@@ -43,41 +42,33 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose EcoMarket?</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We're committed to making sustainable shopping easy, affordable, and impactful.
+              We&apos;re committed to making sustainable shopping easy, affordable, and impactful.
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="bg-eco-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Leaf className="h-8 w-8 text-eco-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">100% Sustainable</h3>
-              <p className="text-gray-600">
-                Every product is carefully vetted for environmental impact and sustainability standards.
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="bg-ocean-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Truck className="h-8 w-8 text-ocean-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Carbon-Neutral Shipping</h3>
-              <p className="text-gray-600">
-                All deliveries are carbon-neutral with eco-friendly packaging materials.
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="bg-earth-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-earth-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Quality Guaranteed</h3>
-              <p className="text-gray-600">
-                Premium quality products that last longer and perform better than conventional alternatives.
-              </p>
-            </div>
-          </div>
+  <div className="flex flex-col items-center">
+    <div className="border border-eco-200 rounded-full w-14 h-14 flex items-center justify-center mb-3">
+      <Leaf className="h-7 w-7 text-eco-600" />
+    </div>
+    <h3 className="text-lg font-medium text-eco-700 mb-1">100% Sustainable</h3>
+    <p className="text-eco-600 text-sm text-center">Every product is carefully vetted for environmental impact and sustainability standards.</p>
+  </div>
+  <div className="flex flex-col items-center">
+    <div className="border border-ocean-200 rounded-full w-14 h-14 flex items-center justify-center mb-3">
+      <Truck className="h-7 w-7 text-ocean-600" />
+    </div>
+    <h3 className="text-lg font-medium text-ocean-700 mb-1">Carbon-Neutral Shipping</h3>
+    <p className="text-ocean-600 text-sm text-center">All deliveries are carbon-neutral with eco-friendly packaging materials.</p>
+  </div>
+  <div className="flex flex-col items-center">
+    <div className="border border-earth-200 rounded-full w-14 h-14 flex items-center justify-center mb-3">
+      <Shield className="h-7 w-7 text-earth-600" />
+    </div>
+    <h3 className="text-lg font-medium text-earth-700 mb-1">Quality Guaranteed</h3>
+    <p className="text-earth-600 text-sm text-center">Premium quality products that last longer and perform better than conventional alternatives.</p>
+  </div>
+</div>
         </div>
       </section>
 
@@ -92,78 +83,46 @@ export default function Home() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Product Card 1 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="bg-eco-100 h-48 flex items-center justify-center">
-                <ShoppingBag className="h-16 w-16 text-eco-600" />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="bg-eco-100 text-eco-800 text-xs px-2 py-1 rounded-full">Organic</span>
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600 ml-1">4.9</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Organic Cotton T-Shirt</h3>
-                <p className="text-gray-600 text-sm mb-4">Soft, breathable, and ethically made from 100% organic cotton.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-eco-600">$29.99</span>
-                  <button className="btn-primary text-sm px-4 py-2">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Product Card 2 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="bg-ocean-100 h-48 flex items-center justify-center">
-                <Heart className="h-16 w-16 text-ocean-600" />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="bg-ocean-100 text-ocean-800 text-xs px-2 py-1 rounded-full">Eco-Friendly</span>
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600 ml-1">4.8</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Bamboo Water Bottle</h3>
-                <p className="text-gray-600 text-sm mb-4">Sustainable bamboo construction with leak-proof design.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-eco-600">$24.99</span>
-                  <button className="btn-primary text-sm px-4 py-2">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Product Card 3 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="bg-earth-100 h-48 flex items-center justify-center">
-                <Leaf className="h-16 w-16 text-earth-600" />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="bg-earth-100 text-earth-800 text-xs px-2 py-1 rounded-full">Recyclable</span>
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600 ml-1">4.7</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Solar Power Bank</h3>
-                <p className="text-gray-600 text-sm mb-4">Charge your devices with clean solar energy on the go.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-eco-600">$49.99</span>
-                  <button className="btn-primary text-sm px-4 py-2">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+  {/* Product Card 1 */}
+  <div className="flex flex-col border border-eco-100 rounded-xl p-6 bg-white items-center hover:bg-eco-50 transition-colors">
+    <ShoppingBag className="h-10 w-10 text-eco-600 mb-4" />
+    <span className="text-xs text-eco-600 mb-2">Organic</span>
+    <h3 className="text-lg font-medium text-eco-700 mb-1">Organic Cotton T-Shirt</h3>
+    <p className="text-eco-600 text-sm text-center mb-4">Soft, breathable, and ethically made from 100% organic cotton.</p>
+    <div className="flex items-center gap-2 mb-2">
+      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+      <span className="text-sm text-eco-700">4.9</span>
+    </div>
+    <span className="text-xl font-bold text-eco-600 mb-3">$29.99</span>
+    <button className="px-5 py-2 rounded-full bg-eco-600 text-white hover:bg-eco-700 transition-colors text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-eco-300">Add to Cart</button>
+  </div>
+  {/* Product Card 2 */}
+  <div className="flex flex-col border border-ocean-100 rounded-xl p-6 bg-white items-center hover:bg-ocean-50 transition-colors">
+    <Heart className="h-10 w-10 text-ocean-600 mb-4" />
+    <span className="text-xs text-ocean-600 mb-2">Eco-Friendly</span>
+    <h3 className="text-lg font-medium text-ocean-700 mb-1">Bamboo Water Bottle</h3>
+    <p className="text-ocean-600 text-sm text-center mb-4">Sustainable bamboo construction with leak-proof design.</p>
+    <div className="flex items-center gap-2 mb-2">
+      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+      <span className="text-sm text-ocean-700">4.8</span>
+    </div>
+    <span className="text-xl font-bold text-ocean-600 mb-3">$24.99</span>
+    <button className="px-5 py-2 rounded-full bg-ocean-600 text-white hover:bg-ocean-700 transition-colors text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ocean-300">Add to Cart</button>
+  </div>
+  {/* Product Card 3 */}
+  <div className="flex flex-col border border-earth-100 rounded-xl p-6 bg-white items-center hover:bg-earth-50 transition-colors">
+    <Leaf className="h-10 w-10 text-earth-600 mb-4" />
+    <span className="text-xs text-earth-600 mb-2">Recyclable</span>
+    <h3 className="text-lg font-medium text-earth-700 mb-1">Solar Power Bank</h3>
+    <p className="text-earth-600 text-sm text-center mb-4">Charge your devices with clean solar energy on the go.</p>
+    <div className="flex items-center gap-2 mb-2">
+      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+      <span className="text-sm text-earth-700">4.7</span>
+    </div>
+    <span className="text-xl font-bold text-earth-600 mb-3">$49.99</span>
+    <button className="px-5 py-2 rounded-full bg-earth-600 text-white hover:bg-earth-700 transition-colors text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-earth-300">Add to Cart</button>
+  </div>
+</div>
           
           <div className="text-center mt-12">
             <Link
@@ -177,26 +136,22 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-eco-600 text-white">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-4">
-            Join the Sustainable Revolution
-          </h2>
-          <p className="text-xl text-eco-100 mb-8">
-            Get exclusive access to new eco-friendly products and sustainability tips.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-eco-300"
-            />
-            <button className="bg-white text-eco-600 hover:bg-eco-50 px-6 py-3 rounded-lg font-semibold transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </section>
+      <section className="py-16 bg-eco-50">
+  <div className="max-w-xl mx-auto text-center px-4">
+    <h2 className="text-2xl md:text-3xl font-bold text-eco-700 mb-2">Join the Sustainable Revolution</h2>
+    <p className="text-md md:text-lg text-eco-600 mb-6">Get exclusive access to new eco-friendly products and sustainability tips.</p>
+    <form className="flex flex-col sm:flex-row gap-3 justify-center">
+      <input
+        type="email"
+        placeholder="Enter your email"
+        className="flex-1 px-4 py-3 rounded-full border border-eco-200 text-eco-700 bg-white focus:outline-none focus:ring-2 focus:ring-eco-300"
+      />
+      <button type="submit" className="px-6 py-3 rounded-full bg-eco-600 text-white hover:bg-eco-700 transition-colors font-semibold focus:outline-none focus:ring-2 focus:ring-eco-300">
+        Subscribe
+      </button>
+    </form>
+  </div>
+</section>
     </div>
   );
 }
