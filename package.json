@@ -7,6 +7,14 @@
     "doc": "docs"
   },
   "scripts": {
+    "dev": "cross-env NODE_ENV=development concurrently -c green.bold -n orchestrator \"pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -FullStack\"",
+    "dev:backend": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Backend",
+    "dev:frontend": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Frontend",
+    "dev:monitoring": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Backend -Monitoring",
+    "dev:status": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Status",
+    "dev:health": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -HealthCheck",
+    "dev:stop": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/shutdown-dev.ps1",
+    "dev:force-stop": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/shutdown-dev.ps1 -Force",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "python -m pip install pre-commit && pre-commit install --hook-type pre-commit --hook-type commit-msg",
     "lint:md": "markdownlint \"**/*.md\" --ignore node_modules",

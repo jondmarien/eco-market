@@ -44,8 +44,13 @@
     },
     "plugins": [
       "expo-notifications",
-      "@stripe/stripe-react-native",
-      "expo-secure-store",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.ecomarket.mobile",
+          "enableGooglePay": true
+        }
+      ],
       "expo-camera",
       "expo-barcode-scanner",
       "expo-location"

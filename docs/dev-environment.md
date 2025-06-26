@@ -1,8 +1,72 @@
 # Development Environment Setup
 
-This document provides information on setting up the development environment for EcoMarket using the provided PowerShell script.
+This document provides information on setting up the development environment for EcoMarket.
 
-## Script: up.ps1
+## **One-Command Startup**
+
+The easiest way to start the entire EcoMarket development environment is with two simple commands:
+
+```bash
+npm install
+npm run dev    # starts everything
+```
+
+This approach will start all services including the backend API, frontend React app, mobile Expo app, and Docker containers in parallel.
+
+### Log Color Prefixes
+
+When running `npm run dev`, you'll see colored output with prefixes to help identify which service is logging:
+
+- **[backend]** - Backend API server logs (typically green)
+- **[frontend]** - React frontend logs (typically blue)
+- **[mobile]** - Expo mobile app logs (typically magenta)
+- **[docker]** - Docker container logs (typically yellow)
+
+### Shutdown
+
+There are several ways to stop all services:
+
+1. **Graceful shutdown** - Press **CTRL+C** in the terminal where `npm run dev` is running
+2. **Manual shutdown** - Run the dedicated shutdown script:
+   ```bash
+   npm run dev:stop        # Graceful shutdown of all services
+   npm run dev:force-stop  # Force immediate termination
+   ```
+3. **Emergency shutdown** - If processes are stuck, use the force option
+
+The shutdown script will:
+- Stop all frontend processes (React, Next.js, Expo)
+- Terminate backend services and health checks
+- Shut down Docker containers (with optional volume cleanup)
+- Clean up background jobs and free up ports
+- Show port status verification
+
+### Troubleshooting
+
+#### Port Conflicts
+- If you see "Port already in use" errors, check what's running on the conflicting ports:
+  - Frontend: typically port 3000
+  - Backend: typically port 8000 or 5000
+  - Mobile: typically port 8081
+- Stop any conflicting processes or change ports in your configuration
+
+#### Docker Issues
+- **Docker daemon not running**: Ensure Docker Desktop is installed and running
+- **Container startup failures**: Check Docker logs with `docker logs <container-name>`
+- **Permission issues**: On Linux/Mac, you may need to run with `sudo` or add your user to the docker group
+
+#### Expo Tunnel Issues
+- **Tunnel connection failed**: Try switching to LAN mode in Expo CLI
+- **QR code not working**: Ensure your phone and computer are on the same network
+- **Expo Go app issues**: Clear the app cache or reinstall Expo Go
+
+---
+
+## Legacy: Individual Service Scripts (Deprecated)
+
+> **⚠️ These standalone scripts are deprecated but kept for granular control when needed. For most development work, use the "One-Command Startup" approach above.**
+
+### Script: up.ps1
 
 The `up.ps1` script in the `scripts` directory is used to start the EcoMarket development stack using Docker Compose. Below are the core components and workflow:
 

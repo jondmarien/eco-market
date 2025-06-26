@@ -128,7 +128,7 @@ export const productsAPI = {
     
     Object.entries(productData).forEach(([key, value]) => {
       if (key === 'images' && value) {
-        Array.from(value).forEach((file) => {
+        Array.from(value as FileList).forEach((file) => {
           formData.append('images', file);
         });
       } else if (key === 'dimensions') {

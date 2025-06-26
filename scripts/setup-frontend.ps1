@@ -235,12 +235,77 @@ $startApps = Read-Host "Would you like to start both applications now? (y/N)"
 if ($startApps -eq 'y' -or $startApps -eq 'Y') {
     Write-Status "Starting applications..."
     
-    # Start Customer Web in new terminal
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend/customer-web; npm run dev"
-    
-    # Wait a moment then start Admin Dashboard
-    Start-Sleep -Seconds 2
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd apps/admin-dashboard; npm start"
-    
-    Write-Success "Applications started in separate terminals!"
+    if ($IsWindows) {
+        # Windows-specific logic
+        # Start Customer Web in new terminal
+        Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend/customer-web; npm run dev"
+        
+        # Wait a moment then start Admin Dashboard
+        Start-Sleep -Seconds 2
+        Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd apps/admin-dashboard; npm start"
+        
+        Write-Success "Applications started in separate terminals!"
+    } else {
+        # macOS/Linux fallback
+        if ($IsMacOS) {
+            # macOS: Use osascript to open new Terminal tabs
+            $script1 = "tell application \"Terminal\" to do script \"cd frontend/customer-web && npm run dev\""
+            $script2 = "tell application \"Terminal\" to do script \"cd apps/admin-dashboard && npm start\""
+            
+            Start-Process -FilePath 'osascript' -ArgumentList @('-e', $script1)
+            Start-Sleep -Seconds 2
+            Start-Process -FilePath 'osascript' -ArgumentList @('-e', $script2)
+            
+            Write-Success "Applications started in separate Terminal tabs!"
+        } elseif ($IsLinux) {
+            # Linux: Try common terminal emulators
+            $terminalFound = $false
+            $terminals = @('gnome-terminal', 'xterm', 'konsole', 'xfce4-terminal')
+            
+            foreach ($terminal in $terminals) {
+                $termPath = (Get-Command $terminal -ErrorAction SilentlyContinue)?.Source
+                if ($termPath) {
+                    switch ($terminal) {
+                        'gnome-terminal' {
+                            Start-Process -FilePath $terminal -ArgumentList @('--tab', '--', 'bash', '-c', 'cd frontend/customer-web && npm run dev; exec bash')
+                            Start-Sleep -Seconds 2
+                            Start-Process -FilePath $terminal -ArgumentList @('--tab', '--', 'bash', '-c', 'cd apps/admin-dashboard && npm start; exec bash')
+                        }
+                        'konsole' {
+                            Start-Process -FilePath $terminal -ArgumentList @('--new-tab', '-e', 'bash', '-c', 'cd frontend/customer-web && npm run dev; exec bash')
+                            Start-Sleep -Seconds 2
+                            Start-Process -FilePath $terminal -ArgumentList @('--new-tab', '-e', 'bash', '-c', 'cd apps/admin-dashboard && npm start; exec bash')
+                        }
+                        'xfce4-terminal' {
+                            Start-Process -FilePath $terminal -ArgumentList @('--tab', '--command', 'bash -c "cd frontend/customer-web && npm run dev; exec bash"')
+                            Start-Sleep -Seconds 2
+                            Start-Process -FilePath $terminal -ArgumentList @('--tab', '--command', 'bash -c "cd apps/admin-dashboard && npm start; exec bash"')
+                        }
+                        default {
+                            # xterm and others - open separate windows
+                            Start-Process -FilePath $terminal -ArgumentList @('-e', 'bash', '-c', 'cd frontend/customer-web && npm run dev; exec bash')
+                            Start-Sleep -Seconds 2
+                            Start-Process -FilePath $terminal -ArgumentList @('-e', 'bash', '-c', 'cd apps/admin-dashboard && npm start; exec bash')
+                        }
+                    }
+                    $terminalFound = $true
+                    break
+                }
+            }
+            
+            if ($terminalFound) {
+                Write-Success "Applications started in separate terminal windows/tabs!"
+            } else {
+                Write-Warning "No supported terminal emulator found. Please install gnome-terminal, xterm, konsole, or xfce4-terminal"
+                Write-Status "Falling back to background processes (no terminal windows)"
+                # TODO: Implement background process fallback for Linux
+            }
+        } else {
+            Write-Warning "Unsupported platform for terminal launching"
+            Write-Status "Please manually start the applications:"
+            Write-Host "  1. cd frontend/customer-web && npm run dev"
+            Write-Host "  2. cd apps/admin-dashboard && npm start"
+            # TODO: Implement cross-platform background process fallback
+        }
+    }
 }

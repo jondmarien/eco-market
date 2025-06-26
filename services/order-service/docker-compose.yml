@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Order Service
   order-service:

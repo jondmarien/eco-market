@@ -159,9 +159,9 @@ INFRASTRUCTURE DETAILS:
 function Write-Section {
     param([string]$Title)
     Write-Host "`n" -NoNewline
-    Write-Host "=" * 80 -ForegroundColor Cyan
+    Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host " $Title" -ForegroundColor Yellow
-    Write-Host "=" * 80 -ForegroundColor Cyan
+    Write-Host ("=" * 80) -ForegroundColor Cyan
 }
 
 function Write-Status {
@@ -180,6 +180,21 @@ function Write-Status {
 
 function Initialize-Environment {
     Write-Status "Initializing development environment..." "INFO"
+    
+    # Load .env file if it exists
+    if (Test-Path ".env") {
+        Write-Status "Loading environment variables from .env file..." "INFO"
+        Get-Content ".env" | ForEach-Object {
+            if ($_ -match "^([^#][^=]*)=(.*)$") {
+                $name = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                [Environment]::SetEnvironmentVariable($name, $value, "Process")
+                Write-Status "Set $name=$value" "SUCCESS"
+            }
+        }
+    } else {
+        Write-Status ".env file not found - using default values" "WARNING"
+    }
     
     # Create logs directory
     if (!(Test-Path $LogDirectory)) {
@@ -232,11 +247,26 @@ function Start-BackendServices {
         if ($LASTEXITCODE -eq 0) {
             Write-Status "Backend services started successfully" "SUCCESS"
             
-            # Wait for services to initialize
-            Write-Status "Waiting for services to initialize..." "INFO"
-            Start-Sleep -Seconds 10
+            # Wait for critical endpoints to be ready before continuing
+            Write-Status "⏳ Waiting for critical endpoints to be ready..." "INFO"
+            Write-Status "  Checking http://localhost:8000/api/v1/health" "INFO"
+            Write-Status "  Checking http://localhost:3000" "INFO"
             
-            # Run health check
+            try {
+                # Use npx wait-on to ensure critical endpoints respond
+                & npx wait-on http://localhost:8000/api/v1/health http://localhost:3000 --timeout 60000 --interval 2000 --log
+                
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Status "✅ Critical endpoints are ready" "SUCCESS"
+                } else {
+                    Write-Status "⚠️  Some endpoints may not be ready, continuing anyway..." "WARNING"
+                }
+            } catch {
+                Write-Status "⚠️  Wait-on check failed: $($_.Exception.Message)" "WARNING"
+                Write-Status "   Continuing with startup..." "INFO"
+            }
+            
+            # Run initial health check
             Invoke-HealthCheck
         } else {
             Write-Status "Failed to start backend services" "ERROR"
@@ -256,13 +286,17 @@ function Start-FrontendApp {
         [string]$AppName,
         [string]$Directory,
         [string]$Command,
-        [int]$Port
+        [int]$Port,
+        [hashtable]$EnvVars = @{}
     )
     
     Write-Status "Starting $AppName..." "INFO"
     
-    if (!(Test-Path $Directory)) {
-        Write-Status "$AppName directory not found: $Directory" "ERROR"
+    # Resolve absolute path from project root
+    $AbsoluteDirectory = Join-Path (Get-Location) $Directory
+    
+    if (!(Test-Path $AbsoluteDirectory)) {
+        Write-Status "$AppName directory not found: $AbsoluteDirectory" "ERROR"
         return $null
     }
     
@@ -278,17 +312,65 @@ function Start-FrontendApp {
     }
     
     try {
-        # Start the frontend application
-        $processArgs = @{
-            FilePath = "npm"
-            ArgumentList = @("run", $Command)
-            WorkingDirectory = $Directory
-            RedirectStandardOutput = "$LogDirectory/$AppName.log"
-            RedirectStandardError = "$LogDirectory/$AppName.error.log"
-            PassThru = $true
+        # Start the frontend application in a visible terminal
+        if ($IsWindows) {
+            # Build environment variable commands for PowerShell
+            $envCommands = ""
+            foreach ($envVar in $EnvVars.GetEnumerator()) {
+                $envCommands += "[Environment]::SetEnvironmentVariable('$($envVar.Key)', '$($envVar.Value)', 'Process'); "
+            }
+            
+            # Use regular PowerShell windows instead of Windows Terminal to avoid complexity
+            $command = "Set-Location '$AbsoluteDirectory'; $envCommands npm run $Command"
+            $proc = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoExit', '-Command', $command) -PassThru
+        } else {
+            # macOS/Linux fallback - open new terminal with appropriate command
+            if ($IsMacOS) {
+                # macOS: Use osascript to open new Terminal tab
+                $script = "tell application `"Terminal`" to do script `"cd '$AbsoluteDirectory' && npm run $Command'`""
+                $proc = Start-Process -FilePath 'osascript' -ArgumentList @('-e', $script) -PassThru
+            } elseif ($IsLinux) {
+                # Linux: Try common terminal emulators
+                $terminalFound = $false
+                $terminals = @('gnome-terminal', 'xterm', 'konsole', 'xfce4-terminal')
+                
+                foreach ($terminal in $terminals) {
+                    $termPath = (Get-Command $terminal -ErrorAction SilentlyContinue)?.Source
+                    if ($termPath) {
+                        switch ($terminal) {
+                            'gnome-terminal' {
+                                $proc = Start-Process -FilePath $terminal -ArgumentList @('--', 'bash', '-c', "cd '$AbsoluteDirectory' && npm run $Command; exec bash") -PassThru
+                            }
+                            'konsole' {
+                                $proc = Start-Process -FilePath $terminal -ArgumentList @('-e', 'bash', '-c', "cd '$AbsoluteDirectory' && npm run $Command; exec bash") -PassThru
+                            }
+                            'xfce4-terminal' {
+                                $proc = Start-Process -FilePath $terminal -ArgumentList @('--command', "bash -c `"cd '$AbsoluteDirectory' && npm run $Command; exec bash`"") -PassThru
+                            }
+                            default {
+                                # xterm and others
+                                $proc = Start-Process -FilePath $terminal -ArgumentList @('-e', 'bash', '-c', "cd '$AbsoluteDirectory' && npm run $Command; exec bash") -PassThru
+                            }
+                        }
+                        $terminalFound = $true
+                        break
+                    }
+                }
+                
+                if (-not $terminalFound) {
+                    Write-Status "No supported terminal emulator found. Please install gnome-terminal, xterm, konsole, or xfce4-terminal" "WARNING"
+                    Write-Status "Falling back to background process (no terminal window)" "INFO"
+                    # TODO: Implement background process fallback
+                    $proc = $null
+                }
+            } else {
+                Write-Status "Unsupported platform for terminal launching. Running in background..." "WARNING"
+                # TODO: Implement cross-platform background process fallback
+                $proc = $null
+            }
         }
         
-        $process = Start-Process @processArgs
+        $process = $proc
         
         if ($process) {
             Write-Status "$AppName started (PID: $($process.Id), Port: $Port)" "SUCCESS"
@@ -298,7 +380,8 @@ function Start-FrontendApp {
             return $null
         }
     } catch {
-        Write-Status "Exception starting $AppName: $($_.Exception.Message)" "ERROR"
+        $errorMsg = $_.Exception.Message
+        Write-Status "Exception starting ${AppName}: $errorMsg" "ERROR"
         return $null
     }
 }
@@ -319,12 +402,14 @@ function Start-AllFrontends {
             Directory = "apps/admin-dashboard"
             Command = "start"
             Port = 3001
+            EnvVars = @{"PORT" = "3001"}
         },
         @{
             Name = "vendor-portal"
             Directory = "apps/vendor-portal"
             Command = "start"
             Port = 3002
+            EnvVars = @{"PORT" = "3002"}
         },
         @{
             Name = "mobile-app"
@@ -335,7 +420,8 @@ function Start-AllFrontends {
     )
     
     foreach ($app in $frontendApps) {
-        $process = Start-FrontendApp -AppName $app.Name -Directory $app.Directory -Command $app.Command -Port $app.Port
+        $envVars = if ($app.EnvVars) { $app.EnvVars } else { @{} }
+        $process = Start-FrontendApp -AppName $app.Name -Directory $app.Directory -Command $app.Command -Port $app.Port -EnvVars $envVars
         if ($process) {
             $Global:FrontendProcesses += @{
                 Name = $app.Name
@@ -451,6 +537,53 @@ function Invoke-HealthCheck {
     }
 }
 
+function Start-EnhancedHealthMonitoring {
+    Write-Status "🏥 Starting enhanced health check monitoring..." "INFO"
+    
+    $healthCheckJob = Start-Job -ScriptBlock {
+        param($ScriptRoot)
+        
+        # Function to run health check and report failures quickly
+        function Invoke-HealthCheckWithQuickFail {
+            try {
+                # Capture health check output
+                $healthOutput = & "$ScriptRoot/health-check-services.ps1" 2>&1
+                
+                # Check for failure indicators in output
+                $failureLines = $healthOutput | Where-Object { $_ -match "❌|Health check failed|No services running" }
+                
+                if ($failureLines) {
+                    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ HEALTH CHECK ALERTS:" -ForegroundColor Red
+                    foreach ($line in $failureLines) {
+                        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ $line" -ForegroundColor Red
+                    }
+                }
+                
+                # Also check container status directly for quicker detection
+                $unhealthyContainers = docker ps --filter "health=unhealthy" --format "{{.Names}} ({{.Status}})" 2>$null
+                if ($unhealthyContainers) {
+                    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ UNHEALTHY CONTAINERS DETECTED:" -ForegroundColor Red
+                    $unhealthyContainers | ForEach-Object {
+                        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ Container: $_" -ForegroundColor Red
+                    }
+                }
+                
+            } catch {
+                Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ❌ Health check script error: $($_.Exception.Message)" -ForegroundColor Red
+            }
+        }
+        
+        # Run health checks every 15 seconds for quicker failure detection
+        while ($true) {
+            Invoke-HealthCheckWithQuickFail
+            Start-Sleep -Seconds 15
+        }
+    } -ArgumentList $PSScriptRoot
+    
+    Write-Status "✅ Enhanced health check monitoring started (15s interval)" "SUCCESS"
+    return $healthCheckJob
+}
+
 function Show-ServiceStatus {
     Write-Section "SERVICE STATUS"
     
@@ -489,13 +622,33 @@ function Show-ServiceStatus {
 function Stop-AllServices {
     Write-Section "STOPPING ALL SERVICES"
     
+    # Stop enhanced health check job
+    if ($healthCheckJob) {
+        Write-Status "Stopping enhanced health monitoring..." "INFO"
+        try {
+            Stop-Job -Job $healthCheckJob -ErrorAction SilentlyContinue
+            Remove-Job -Job $healthCheckJob -ErrorAction SilentlyContinue
+            Write-Status "Enhanced health monitoring stopped" "SUCCESS"
+        } catch {
+            Write-Status "Error stopping health monitoring: $($_.Exception.Message)" "WARNING"
+        }
+    }
+    
     # Stop frontend processes
     if ($Global:FrontendProcesses.Count -gt 0) {
         Write-Status "Stopping frontend applications..." "INFO"
         foreach ($app in $Global:FrontendProcesses) {
             if ($app.Process -and !$app.Process.HasExited) {
                 try {
-                    Stop-Process -Id $app.Process.Id -Force
+                    # Try graceful shutdown first (important for terminal hosts like wt.exe with multiple tabs)
+                    $app.Process.CloseMainWindow()
+                    Start-Sleep -Milliseconds 500
+                    
+                    # If process hasn't exited, force termination as fallback
+                    if (!$app.Process.HasExited) {
+                        Stop-Process -Id $app.Process.Id -Force
+                    }
+                    
                     Write-Status "Stopped $($app.Name)" "SUCCESS"
                 } catch {
                     Write-Status "Error stopping $($app.Name): $($_.Exception.Message)" "ERROR"
@@ -508,13 +661,21 @@ function Stop-AllServices {
     # Stop Docker services
     Write-Status "Stopping backend services..." "INFO"
     try {
-        docker compose -f infrastructure/docker-compose.dev.yml down
+        docker compose -f infrastructure/docker-compose.dev.yml down --volumes
         if (Test-Path "infrastructure/docker-compose.monitoring.yml") {
-            docker compose -f infrastructure/docker-compose.monitoring.yml down
+            docker compose -f infrastructure/docker-compose.monitoring.yml down --volumes
         }
         Write-Status "Backend services stopped" "SUCCESS"
     } catch {
         Write-Status "Error stopping backend services: $($_.Exception.Message)" "ERROR"
+    }
+    
+    # Clean up any remaining background jobs
+    try {
+        Get-Job | Where-Object { $_.State -eq 'Running' } | Stop-Job -ErrorAction SilentlyContinue
+        Get-Job | Remove-Job -ErrorAction SilentlyContinue
+    } catch {
+        # Ignore cleanup errors
     }
     
     Write-Status "All services stopped" "SUCCESS"
@@ -522,7 +683,12 @@ function Stop-AllServices {
 
 function Register-ShutdownHandler {
     # Register Ctrl+C handler
-    [console]::TreatControlCAsInput = $false
+    try {
+        [console]::TreatControlCAsInput = $false
+    } catch {
+        # Handle invalid console context (e.g., when running in non-interactive mode)
+        Write-Status "Console control registration skipped (non-interactive mode)" "WARNING"
+    }
     $null = Register-EngineEvent PowerShell.Exiting -Action {
         Write-Host "`nShutting down..." -ForegroundColor Yellow
         Stop-AllServices
@@ -576,6 +742,12 @@ if ($startBackend) {
         Write-Status "Failed to start backend services" "ERROR"
         exit 1
     }
+}
+
+# Start enhanced health monitoring if we're starting services
+$healthCheckJob = $null
+if ($startBackend -or $startFrontend -or $startSpecific) {
+    $healthCheckJob = Start-EnhancedHealthMonitoring
 }
 
 # Start frontend services
