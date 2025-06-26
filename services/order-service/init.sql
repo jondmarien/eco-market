@@ -75,4 +75,4 @@ $do$;
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO orders_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO orders_user;
-GRANT ALL PRIVILEGES ON DATABASE orders_db TO orders_user;
+GRANT ALL PRIVILEGES ON DATABASE ecomarket_dev TO orders_user;
