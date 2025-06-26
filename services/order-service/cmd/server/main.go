@@ -12,6 +12,8 @@ import (
 	"github.com/jondmarien/eco-market/services/order-service/internal/config"
 	"github.com/jondmarien/eco-market/services/order-service/internal/database"
 	"github.com/jondmarien/eco-market/services/order-service/internal/handlers"
+	"github.com/jondmarien/eco-market/services/order-service/internal/repository"
+	"github.com/jondmarien/eco-market/services/order-service/internal/service"
 	"github.com/gorilla/mux"
 )
 
@@ -32,8 +34,17 @@ func main() {
 	}
 	defer redisClient.Close()
 
+	// Initialize repository and service layers
+	repo := repository.NewOrderRepository(db, redisClient)
+	orderService := service.NewOrderService(repo)
+
+	// Initialize database schema
+	if err := repo.InitializeDatabase(context.Background()); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+
 	// Initialize handlers
-	orderHandler := handlers.NewOrderHandler(db, redisClient)
+	orderHandler := handlers.NewOrderHandler(orderService)
 
 	// Setup routes
 	router := mux.NewRouter()
@@ -45,6 +56,8 @@ func main() {
 	api.HandleFunc("/orders/{id}", orderHandler.GetOrder).Methods("GET")
 	api.HandleFunc("/orders/{id}", orderHandler.UpdateOrder).Methods("PUT")
 	api.HandleFunc("/orders/{id}/status", orderHandler.UpdateOrderStatus).Methods("PATCH")
+	api.HandleFunc("/orders/{id}/cancel", orderHandler.CancelOrder).Methods("POST")
+	api.HandleFunc("/admin/orders/stats", orderHandler.GetOrderStats).Methods("GET")
 	
 	// Health check
 	api.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

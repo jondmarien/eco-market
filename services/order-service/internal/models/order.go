@@ -85,3 +85,12 @@ type OrdersResponse struct {
 	Page   int     `json:"page"`
 	Limit  int     `json:"limit"`
 }
+
+// OrderStats represents order statistics
+type OrderStats struct {
+	TotalOrders     int     `json:"total_orders"`
+	PendingOrders   int     `json:"pending_orders"`
+	CompletedOrders int     `json:"completed_orders"`
+	CancelledOrders int     `json:"cancelled_orders"`
+	TotalRevenue    float64 `json:"total_revenue"`
+}
