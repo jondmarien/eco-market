@@ -15,7 +15,7 @@
   "author": "EcoMarket Team",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^4.22.1",
     "mongoose": "^8.0.3",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
